@@ -1,8 +1,8 @@
-import { Timestamp } from "firebase/firestore";
+import { addDoc, collection, Timestamp } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useState } from "react";
-import { storage } from "../firebaseConfig";
-
+import { toast } from "react-toastify";
+import { storage, db } from "../firebaseConfig";
 
 const AddArticle = () => {
   const [formData, setFormData] = useState({
@@ -15,41 +15,60 @@ const AddArticle = () => {
   const [progress, setProgress] = useState(0);
 
   const handleChange = (e) => {
-    setFormData({...formData, [e.target.name]:e.target.value})
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleImageChange = (e) => {
-    setFormData({...formData, image: e.target.files[0]});
+    setFormData({ ...formData, image: e.target.files[0] });
   };
 
   const handlePublish = () => {
     if (!formData.title || !formData.description || !formData.image) {
-        alert('Please fill all the fields.');
-        return;
+      alert("Please fill all the fields.");
+      return;
     }
-     const storageRef = ref(storage, `/images/${Date.now()}${formData.image.name}`);
-     const uploadImage = uploadBytesResumable(storageRef, formData.image);
+    const storageRef = ref(
+      storage,
+      `/images/${Date.now()}${formData.image.name}`
+    );
+    const uploadImage = uploadBytesResumable(storageRef, formData.image);
 
-     uploadImage.on('state_changed', (snapshot) => {
-        const progressPercent = Math.round((snapshot.bytesTransferred/snapshot.totalBytes)*100);
+    uploadImage.on(
+      "state_changed",
+      (snapshot) => {
+        const progressPercent = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
         setProgress(progressPercent);
-     },
-     (err) => {
+      },
+      (err) => {
         console.log(err);
-     },
-     () => {
+      },
+      () => {
         setFormData({
-            title:'',
-            description: '',
-            image: ''
+          title: "",
+          description: "",
+          image: "",
         });
-        getDownloadURL(uploadImage.snapshot.ref).th
-        en((url)=>{})
-     }
-     );
-
-
-  }
+        getDownloadURL(uploadImage.snapshot.ref).then((url) => {
+            const articleRef = collection(db, 'Articles')
+            addDoc(articleRef,{
+                title: formData.title,
+                description: formData.description,
+                imageUrl:url,
+                createdAt: Timestamp.now().toDate()
+            })
+            .then(()=>{
+                toast('Article added successfully', {type:'success'});
+                setProgress(0);
+            })
+            .catch(err=>{
+                toast('Error whie adding article', {type:'error'})
+            })
+        });
+      }
+    );
+  };
 
   return (
     <div className="border p-3 mt-3 bg-light" style={{ position: "fixed" }}>
@@ -77,15 +96,21 @@ const AddArticle = () => {
         className="form-conrol"
         onChange={(e) => handleImageChange(e)}
       />
-      <div className="progress">
+      {progress === 0 ? null :(
+        <div className="progress">
         <div
           className="progress-bar progress-bar-striped mt-2"
-          style={{ width: "50%" }}
+          style={{ width: `${progress}%` }}
         >
-          50%
+          {`uploading image ${progress}%`};
         </div>
       </div>
-      <button className="form-control bg-primary text-light mt-2" onClick={handlePublish}>
+      )}
+      
+      <button
+        className="form-control bg-primary text-light mt-2"
+        onClick={handlePublish}
+      >
         Publish
       </button>
     </div>
