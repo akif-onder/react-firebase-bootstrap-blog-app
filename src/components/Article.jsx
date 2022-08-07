@@ -1,9 +1,12 @@
 import { doc, onSnapshot } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { useParams } from "react-router-dom";
-import { db } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
+import LikeArticle from './LikeArticle';
 
 const Article = () => {
+    const [user] =useAuthState(auth);
     const {id} = useParams();
     const [article, setArticle] = useState(null)
 
@@ -30,7 +33,14 @@ const Article = () => {
                     <h5>Author:{article.createdBy}</h5>
                     <div>Posted On: {article.createdAt.toDate().toDateString()}</div>
                     <hr />
-                    
+                    <h4>{article.description}</h4>
+                    <div className="d-flex flex-row-reverse">
+                        {user && <LikeArticle id={id} likes={article.likes}/>}
+                        <div className="pe-2">
+                            <p>{article.likes.length}</p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         }
