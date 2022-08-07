@@ -81,19 +81,19 @@ const AddArticle = () => {
         value={formData.title}
         onChange={(e) => handleChange(e)}
       />
-      <label htmlFor="">Description</label>
+      <label htmlFor=""  className="mt-2">Description</label>
       <textarea
         name="description"
         className="form-control"
         value={formData.description}
         onChange={(e) => handleChange(e)}
       />
-      <label htmlFor="">Image</label>
+      <label htmlFor="" className="mt-2">Image</label>
       <input
         type="file"
         name="image"
         accept="image/*"
-        className="form-conrol"
+        className="form-control "
         onChange={(e) => handleImageChange(e)}
       />
       {progress === 0 ? null :(
