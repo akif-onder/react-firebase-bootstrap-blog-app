@@ -1,9 +1,13 @@
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { db } from "../firebaseConfig";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, db } from "../firebaseConfig";
 import DeleteArticle from "./DeleteArticle";
+import LikeArticle from "./LikeArticle";
+import { Link } from "react-router-dom";
 
 const Articles = () => {
+  const [user] = useAuthState(auth);
   const [articles, setArticles] = useState([]);
   useEffect(() => {
     const articleRef = collection(db, "Articles");
@@ -23,21 +27,42 @@ const Articles = () => {
       {articles.length === 0 ? (
         <p>No articles found!</p>
       ) : (
-        articles.map(({ id, title, description, imageUrl, createdAt }) => (
+        articles.map(({ id, title, description, imageUrl, createdAt,createdBy, userId, likes, comments }) => (
           <div className="border mt-3 p-3 bg-light" key={id}>
             <div className="row">
               <div className="col-3">
+                <Link to={`/article/${id}`}>
                 <img
                   src={imageUrl}
                   alt="title"
-                  style={{ height: 180, width: 180 }}
+                  style={{ height: 120, width: 120 }}
                 />
+                </Link>
               </div>
               <div className="col-9 ps-3">
+                <div className="row">
+                  <div className="col-6">
+                  {
+                    createdBy && (
+                      <span className="badge bg-primary">{createdBy}</span>
+                    )
+                  }
+                </div>
+                <div className="col-6 d-flex flex-row-reverse">
+                  {
+                    user && user.uid === userId && (
+                      <DeleteArticle id={id} imageUrl={imageUrl} />
+                    )
+                  }
+                </div>
+                </div>
                 <h2>{title}</h2>
                 <p>{createdAt.toDate().toString()}</p>
-                <h4>{description}</h4>
-                <DeleteArticle id={id} imageUrl={imageUrl} />
+                <h5>{description}</h5>
+                <div className="d-flex flex-row-reverse">
+                  {user && <LikeArticle id={id} likes={likes} />}
+                </div>
+                
               </div>
             </div>
           </div>
