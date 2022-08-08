@@ -61,6 +61,16 @@ const Articles = () => {
                 <h5>{description}</h5>
                 <div className="d-flex flex-row-reverse">
                   {user && <LikeArticle id={id} likes={likes} />}
+                  <div className="pe-2">
+                    <p>{likes.length} likes</p>
+                  </div>
+                  {
+                    comments && comments.length > 0 && (
+                      <div className="pe-2">
+                        <p>{comments?.length} comments</p>
+                      </div>
+                    )
+                  }
                 </div>
                 
               </div>

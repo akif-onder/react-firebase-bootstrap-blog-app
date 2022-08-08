@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useParams } from "react-router-dom";
 import { auth, db } from '../firebaseConfig';
+import Comment from './Comment';
 import LikeArticle from './LikeArticle';
 
 const Article = () => {
@@ -15,10 +16,8 @@ const Article = () => {
       const docRef = doc(db, 'Articles', id);
       onSnapshot(docRef, (snapshot) =>{
         setArticle({...snapshot.data(), id:snapshot.id})
-      })
-    
-     
-    }, [])
+      });
+ },[]);
     
   return (
     <div className='container border bg-light' style={{marginTop: 70}}>
@@ -40,7 +39,7 @@ const Article = () => {
                             <p>{article.likes.length}</p>
                         </div>
                     </div>
-
+                    <Comment id={article.id}/>
                 </div>
             </div>
         }
